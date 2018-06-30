@@ -16,15 +16,17 @@ namespace LiveRates.Client
     {
         #region Fields
 
-        private HttpClientHandler _webApiHandler = null;
-        private HttpClient _webApiCaller = null;
-        private readonly string _baseUri = "https://www.live-rates.com/";
+        protected HttpClientHandler _webApiHandler = null;
+        protected HttpClient _webApiCaller = null;
+        protected readonly string _baseUri = "https://www.live-rates.com/";
 
         #endregion
 
         #region Public Properties
 
         public string Key { get; set; }
+
+        public bool HasKey { get => !string.IsNullOrWhiteSpace(Key); }
 
         #endregion
 
@@ -74,32 +76,32 @@ namespace LiveRates.Client
             return SendRequestAsync(request, cancellationToken);
         }
 
-        public Task<IEnumerable<LiveRate>> GetPriceAsync(IEnumerable<LiveRateSymbol> symbols)
+        public virtual Task<IEnumerable<LiveRate>> GetPriceAsync(IEnumerable<LiveRateSymbol> symbols)
         {
             return GetPriceAsync(symbols, CancellationToken.None);
         }
 
-        public Task<IEnumerable<LiveRate>> GetPriceAsync(IEnumerable<LiveRateSymbol> symbols, CancellationToken cancellationToken)
+        public virtual Task<IEnumerable<LiveRate>> GetPriceAsync(IEnumerable<LiveRateSymbol> symbols, CancellationToken cancellationToken)
         {
             return GetPriceAsync(symbols.Select(s => s.RequestSymbol), cancellationToken);
         }
 
-        public Task<IEnumerable<LiveRate>> GetRatesAsync()
+        public virtual Task<IEnumerable<LiveRate>> GetRatesAsync()
         {
             return GetRatesAsync(CancellationToken.None);
         }
 
-        public Task<IEnumerable<LiveRate>> GetRatesAsync(CancellationToken cancellationToken)
+        public virtual Task<IEnumerable<LiveRate>> GetRatesAsync(CancellationToken cancellationToken)
         {
             return SendRequestAsync(BuildRequest("/rates"), cancellationToken);
         }
 
-        public Task<IEnumerable<LiveRateSymbol>> GetSymbolsAsync()
+        public virtual Task<IEnumerable<LiveRateSymbol>> GetSymbolsAsync()
         {
             return GetSymbolsAsync(CancellationToken.None);
         }
 
-        public async Task<IEnumerable<LiveRateSymbol>> GetSymbolsAsync(CancellationToken cancellationToken)
+        public virtual async Task<IEnumerable<LiveRateSymbol>> GetSymbolsAsync(CancellationToken cancellationToken)
         {
             var rates = await GetRatesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -107,12 +109,12 @@ namespace LiveRates.Client
                    select new LiveRateSymbol(r.Currency);
         }
 
-        public Task<IEnumerable<LiveRateSymbol>> GetCurrencySymbolsAsync()
+        public virtual Task<IEnumerable<LiveRateSymbol>> GetCurrencySymbolsAsync()
         {
             return GetCurrencySymbolsAsync(CancellationToken.None);
         }
 
-        public async Task<IEnumerable<LiveRateSymbol>> GetCurrencySymbolsAsync(CancellationToken cancellationToken)
+        public virtual async Task<IEnumerable<LiveRateSymbol>> GetCurrencySymbolsAsync(CancellationToken cancellationToken)
         {
             var symbols = await GetSymbolsAsync(cancellationToken);
             return symbols.Where(s => s.IsCurrency == true);
@@ -155,9 +157,9 @@ namespace LiveRates.Client
                 Path = $"{apiName.TrimEnd('/')}/"
             };
 
-            string key = Key;
-            if (!string.IsNullOrWhiteSpace(key))
+            if (HasKey)
             {
+                string key = Key;
                 if (parameters == null)
                 {
                     parameters = new NameValueCollection(1)
@@ -212,7 +214,6 @@ namespace LiveRates.Client
             return new List<LiveRate>(0);
         }
 
-
         #endregion
 
         #region IDisposable Support
@@ -238,7 +239,6 @@ namespace LiveRates.Client
             }
         }
 
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
         ~RateProviderApiClient()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
