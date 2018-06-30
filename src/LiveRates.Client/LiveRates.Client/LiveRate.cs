@@ -7,17 +7,11 @@ namespace LiveRates.Client
     /// </summary>
     public class LiveRate
     {
-        #region Fields
-
-        private string _currency;
-
-        #endregion
-
         #region Public Properties
 
         public string Currency
         {
-            get { return _currency; }
+            get { return Symbol.Symbol; }
             set
             {
                 var symbol = value;
@@ -36,7 +30,6 @@ namespace LiveRates.Client
                     }
 
                     Symbol = new LiveRateSymbol(symbol);
-                    _currency = symbol;
                 }
             }
         }
