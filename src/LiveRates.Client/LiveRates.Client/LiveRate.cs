@@ -52,7 +52,7 @@ namespace LiveRates.Client
 
         public decimal Low { get; set; }
 
-        public string TimeStamp { get; set; }
+        public DateTime TimeStamp { get; set; }
 
         #endregion
 

@@ -236,7 +236,7 @@ namespace LiveRates.Client
                                High = r.High.ToDecimal(),
                                Low = r.Low.ToDecimal(),
                                Rate = r.Rate,
-                               TimeStamp = r.TimeStamp
+                               TimeStamp = EpochHelper.FromEpoch(Convert.ToInt64(r.TimeStamp))
                            };
                 }
             }
