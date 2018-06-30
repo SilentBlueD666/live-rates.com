@@ -24,13 +24,21 @@ namespace LiveRates.Client
 
         Task<IEnumerable<LiveRate>> GetRatesAsync(CancellationToken cancellationToken);
 
-        Task<IEnumerable<LiveRate>> GetPriceAsync(IEnumerable<string> symbols);
+        Task<LiveRate> GetPriceAsync(string symbol);
 
-        Task<IEnumerable<LiveRate>> GetPriceAsync(IEnumerable<string> symbols, CancellationToken cancellationToken);
+        Task<LiveRate> GetPriceAsync(string symbol, CancellationToken cancellationToken);
 
-        Task<IEnumerable<LiveRate>> GetPriceAsync(IEnumerable<LiveRateSymbol> symbols);
+        Task<LiveRate> GetPriceAsync(LiveRateSymbol symbol);
 
-        Task<IEnumerable<LiveRate>> GetPriceAsync(IEnumerable<LiveRateSymbol> symbols, CancellationToken cancellationToken);
+        Task<LiveRate> GetPriceAsync(LiveRateSymbol symbol, CancellationToken cancellationToken);
+
+        Task<IEnumerable<LiveRate>> GetPricesAsync(IEnumerable<string> symbols);
+
+        Task<IEnumerable<LiveRate>> GetPricesAsync(IEnumerable<string> symbols, CancellationToken cancellationToken);
+
+        Task<IEnumerable<LiveRate>> GetPricesAsync(IEnumerable<LiveRateSymbol> symbols);
+
+        Task<IEnumerable<LiveRate>> GetPricesAsync(IEnumerable<LiveRateSymbol> symbols, CancellationToken cancellationToken);
 
         #endregion
     }

@@ -56,12 +56,44 @@ namespace LiveRates.Client
 
         #region IRateProviderApiClient Implementation
 
-        public Task<IEnumerable<LiveRate>> GetPriceAsync(IEnumerable<string> symbols)
+        public Task<LiveRate> GetPriceAsync(string symbol)
         {
-            return GetPriceAsync(symbols, CancellationToken.None);
+            return GetPriceAsync(symbol, CancellationToken.None);
         }
 
-        public Task<IEnumerable<LiveRate>> GetPriceAsync(IEnumerable<string> symbols, CancellationToken cancellationToken)
+        public async Task<LiveRate> GetPriceAsync(string symbol, CancellationToken cancellationToken)
+        {
+            var queryStringParams = new NameValueCollection(2)
+            {
+                { "rate", symbol }
+            };
+
+            HttpRequestMessage request = BuildRequest(
+                apiName: "api/price",
+                parameters: queryStringParams
+                );
+
+            var rates = await SendRequestAsync(request, cancellationToken).ConfigureAwait(false);
+
+            return rates.FirstOrDefault();
+        }
+
+        public Task<LiveRate> GetPriceAsync(LiveRateSymbol symbol)
+        {
+            return GetPriceAsync(symbol, CancellationToken.None);
+        }
+
+        public Task<LiveRate> GetPriceAsync(LiveRateSymbol symbol, CancellationToken cancellationToken)
+        {
+            return GetPriceAsync(symbol.RequestSymbol, cancellationToken);
+        }
+
+        public Task<IEnumerable<LiveRate>> GetPricesAsync(IEnumerable<string> symbols)
+        {
+            return GetPricesAsync(symbols, CancellationToken.None);
+        }
+
+        public Task<IEnumerable<LiveRate>> GetPricesAsync(IEnumerable<string> symbols, CancellationToken cancellationToken)
         {
             var queryStringParams = new NameValueCollection(2)
             {
@@ -76,14 +108,14 @@ namespace LiveRates.Client
             return SendRequestAsync(request, cancellationToken);
         }
 
-        public virtual Task<IEnumerable<LiveRate>> GetPriceAsync(IEnumerable<LiveRateSymbol> symbols)
+        public virtual Task<IEnumerable<LiveRate>> GetPricesAsync(IEnumerable<LiveRateSymbol> symbols)
         {
-            return GetPriceAsync(symbols, CancellationToken.None);
+            return GetPricesAsync(symbols, CancellationToken.None);
         }
 
-        public virtual Task<IEnumerable<LiveRate>> GetPriceAsync(IEnumerable<LiveRateSymbol> symbols, CancellationToken cancellationToken)
+        public virtual Task<IEnumerable<LiveRate>> GetPricesAsync(IEnumerable<LiveRateSymbol> symbols, CancellationToken cancellationToken)
         {
-            return GetPriceAsync(symbols.Select(s => s.RequestSymbol), cancellationToken);
+            return GetPricesAsync(symbols.Select(s => s.RequestSymbol), cancellationToken);
         }
 
         public virtual Task<IEnumerable<LiveRate>> GetRatesAsync()
@@ -128,8 +160,6 @@ namespace LiveRates.Client
         /// Builds a Http request message with API client defaults.
         /// </summary>
         /// <param name="apiName">The API endpoint to call.</param>
-        /// <param name="method">The HttpMethod the default is GET.</param>
-        /// <param name="apiRequest">ApiRequest base object values to apply to the request.</param>
         /// <returns>A HttpRequestMessage setup with defaults and specified values.</returns>
         protected virtual HttpRequestMessage BuildRequest(string apiName, NameValueCollection parameters = null)
         {
