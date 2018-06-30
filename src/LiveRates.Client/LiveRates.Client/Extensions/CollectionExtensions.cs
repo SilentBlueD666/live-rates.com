@@ -3,6 +3,9 @@ using System.Collections.Specialized;
 
 namespace LiveRates.Client.Extensions
 {
+    /// <summary>
+    /// Collection extension method helpers.
+    /// </summary>
     internal static class CollectionExtensions
     {
         /// <summary>

@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace LiveRates.Client
 {
+    /// <summary>
+    /// Represent live-rates.com API Client.
+    /// </summary>
     public class RateProviderApiClient : IRateProviderApiClient, IDisposable
     {
         #region Fields
@@ -24,14 +27,23 @@ namespace LiveRates.Client
 
         #region Public Properties
 
+        /// <summary>
+        /// The API access Key.
+        /// </summary>
         public string Key { get; set; }
 
+        /// <summary>
+        /// Determines if a <see cref="Key"/> has been specified.
+        /// </summary>
         public bool HasKey { get => !string.IsNullOrWhiteSpace(Key); }
 
         #endregion
 
         #region Constructors
 
+        /// <summary>
+        /// Creates a default instance of the class.
+        /// </summary>
         public RateProviderApiClient()
         {
             _webApiHandler = new HttpClientHandler
@@ -46,6 +58,10 @@ namespace LiveRates.Client
             _webApiCaller.DefaultRequestHeaders.ConnectionClose = false;
         }
 
+        /// <summary>
+        /// Creates a default instance of the class with an API Key.
+        /// </summary>
+        /// <param name="key">The API access Key.</param>
         public RateProviderApiClient(string key)
             : this()
         {
@@ -56,11 +72,13 @@ namespace LiveRates.Client
 
         #region IRateProviderApiClient Implementation
 
+        /// <inheritdoc/>
         public Task<LiveRate> GetPriceAsync(string symbol)
         {
             return GetPriceAsync(symbol, CancellationToken.None);
         }
 
+        /// <inheritdoc/>
         public async Task<LiveRate> GetPriceAsync(string symbol, CancellationToken cancellationToken)
         {
             var queryStringParams = new NameValueCollection(2)
@@ -78,21 +96,25 @@ namespace LiveRates.Client
             return rates.FirstOrDefault();
         }
 
+        /// <inheritdoc/>
         public Task<LiveRate> GetPriceAsync(LiveRateSymbol symbol)
         {
             return GetPriceAsync(symbol, CancellationToken.None);
         }
 
+        /// <inheritdoc/>
         public Task<LiveRate> GetPriceAsync(LiveRateSymbol symbol, CancellationToken cancellationToken)
         {
             return GetPriceAsync(symbol.RequestSymbol, cancellationToken);
         }
 
+        /// <inheritdoc/>
         public Task<IEnumerable<LiveRate>> GetPricesAsync(IEnumerable<string> symbols)
         {
             return GetPricesAsync(symbols, CancellationToken.None);
         }
 
+        /// <inheritdoc/>
         public Task<IEnumerable<LiveRate>> GetPricesAsync(IEnumerable<string> symbols, CancellationToken cancellationToken)
         {
             var queryStringParams = new NameValueCollection(2)
@@ -108,31 +130,37 @@ namespace LiveRates.Client
             return SendRequestAsync(request, cancellationToken);
         }
 
+        /// <inheritdoc/>
         public virtual Task<IEnumerable<LiveRate>> GetPricesAsync(IEnumerable<LiveRateSymbol> symbols)
         {
             return GetPricesAsync(symbols, CancellationToken.None);
         }
 
+        /// <inheritdoc/>
         public virtual Task<IEnumerable<LiveRate>> GetPricesAsync(IEnumerable<LiveRateSymbol> symbols, CancellationToken cancellationToken)
         {
             return GetPricesAsync(symbols.Select(s => s.RequestSymbol), cancellationToken);
         }
 
+        /// <inheritdoc/>
         public virtual Task<IEnumerable<LiveRate>> GetRatesAsync()
         {
             return GetRatesAsync(CancellationToken.None);
         }
 
+        /// <inheritdoc/>
         public virtual Task<IEnumerable<LiveRate>> GetRatesAsync(CancellationToken cancellationToken)
         {
             return SendRequestAsync(BuildRequest("/rates"), cancellationToken);
         }
 
+        /// <inheritdoc/>
         public virtual Task<IEnumerable<LiveRateSymbol>> GetSymbolsAsync()
         {
             return GetSymbolsAsync(CancellationToken.None);
         }
 
+        /// <inheritdoc/>
         public virtual async Task<IEnumerable<LiveRateSymbol>> GetSymbolsAsync(CancellationToken cancellationToken)
         {
             var rates = await GetRatesAsync(cancellationToken).ConfigureAwait(false);
@@ -141,11 +169,13 @@ namespace LiveRates.Client
                    select new LiveRateSymbol(r.Currency);
         }
 
+        /// <inheritdoc/>
         public virtual Task<IEnumerable<LiveRateSymbol>> GetCurrencySymbolsAsync()
         {
             return GetCurrencySymbolsAsync(CancellationToken.None);
         }
 
+        /// <inheritdoc/>
         public virtual async Task<IEnumerable<LiveRateSymbol>> GetCurrencySymbolsAsync(CancellationToken cancellationToken)
         {
             var symbols = await GetSymbolsAsync(cancellationToken);
@@ -160,7 +190,8 @@ namespace LiveRates.Client
         /// Builds a Http request message with API client defaults.
         /// </summary>
         /// <param name="apiName">The API endpoint to call.</param>
-        /// <returns>A HttpRequestMessage setup with defaults and specified values.</returns>
+        /// <param name="parameters">A <see cref="NameValueCollection"/> for creating a query string.</param>
+        /// <returns>A <see cref="HttpRequestMessage"/> set-up with defaults and specified values.</returns>
         protected virtual HttpRequestMessage BuildRequest(string apiName, NameValueCollection parameters = null)
         {
             var request = new HttpRequestMessage()
@@ -178,7 +209,8 @@ namespace LiveRates.Client
         /// <summary>
         /// Build a HTTP Uri endpoint request.
         /// </summary>
-        /// <param name="apiName">API function name.</param>
+        /// <param name="apiName">The API endpoint to call.</param>
+        /// <param name="parameters">A <see cref="NameValueCollection"/> for creating a query string.</param>
         /// <returns>A Uri object that contains the full endpoint information.</returns>
         protected virtual Uri BuildRequestUri(string apiName, NameValueCollection parameters = null)
         {
@@ -211,6 +243,12 @@ namespace LiveRates.Client
 
         #region Http Helpers
 
+        /// <summary>
+        /// Sends a request to the API endpoint.
+        /// </summary>
+        /// <param name="request">The <see cref="HttpRequestMessage"/> to send.</param>
+        /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
+        /// <returns>An <see cref="Task"/> that represents an asynchronous operation that contains a list of <see cref="LiveRate"/> objects.</returns>
         protected virtual async Task<IEnumerable<LiveRate>> SendRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             using (HttpResponseMessage response = await _webApiCaller.SendAsync(request, cancellationToken).ConfigureAwait(false))
