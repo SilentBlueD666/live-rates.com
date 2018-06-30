@@ -81,6 +81,9 @@ namespace LiveRates.Client
         /// <inheritdoc/>
         public async Task<LiveRate> GetPriceAsync(string symbol, CancellationToken cancellationToken)
         {
+            if (!HasKey)
+                throw new InvalidOperationException("API access Key is required for access to prices.");
+
             var queryStringParams = new NameValueCollection(2)
             {
                 { "rate", symbol }
@@ -91,7 +94,7 @@ namespace LiveRates.Client
                 parameters: queryStringParams
                 );
 
-            var rates = await SendRequestAsync(request, cancellationToken).ConfigureAwait(false);
+            var rates = await SendRateRequestAsync(request, cancellationToken).ConfigureAwait(false);
 
             return rates.FirstOrDefault();
         }
@@ -117,6 +120,9 @@ namespace LiveRates.Client
         /// <inheritdoc/>
         public Task<IEnumerable<LiveRate>> GetPricesAsync(IEnumerable<string> symbols, CancellationToken cancellationToken)
         {
+            if (!HasKey)
+                throw new InvalidOperationException("API access Key is required for access to prices.");
+
             var queryStringParams = new NameValueCollection(2)
             {
                 { "rate", string.Join(",", symbols) }
@@ -127,7 +133,7 @@ namespace LiveRates.Client
                 parameters: queryStringParams
                 );
 
-            return SendRequestAsync(request, cancellationToken);
+            return SendRateRequestAsync(request, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -151,7 +157,7 @@ namespace LiveRates.Client
         /// <inheritdoc/>
         public virtual Task<IEnumerable<LiveRate>> GetRatesAsync(CancellationToken cancellationToken)
         {
-            return SendRequestAsync(BuildRequest("/rates"), cancellationToken);
+            return SendRateRequestAsync(BuildRequest("/rates"), cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -163,10 +169,29 @@ namespace LiveRates.Client
         /// <inheritdoc/>
         public virtual async Task<IEnumerable<LiveRateSymbol>> GetSymbolsAsync(CancellationToken cancellationToken)
         {
-            var rates = await GetRatesAsync(cancellationToken).ConfigureAwait(false);
+            if (!HasKey)
+                throw new InvalidOperationException("API access Key is required to access list of rate symbols.");
 
-            return from r in rates
-                   select new LiveRateSymbol(r.Currency);
+            using (HttpResponseMessage response = await _webApiCaller.SendAsync(BuildRequest("/api/rates"), cancellationToken).ConfigureAwait(false))
+            {
+                response.EnsureSuccessStatusCode();
+                if (response.Content != null)
+                {
+                    string jsonContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                    var symbols = JsonConvert.DeserializeObject<ApiSymbol[]>(jsonContent);
+                    if (symbols.All(r => r.Currency == null))
+                    {
+                        var errors = JsonConvert.DeserializeObject<ApiErrorMessage[]>(jsonContent);
+                        throw new ApiException(string.Join(", ", errors.Select(x => x.Error)), errors, jsonContent);
+                    }
+
+                    return from s in symbols
+                           select new LiveRateSymbol(s.Currency, EpochHelper.FromEpoch(Convert.ToInt64(s.Updated)));
+                }
+            }
+
+            return new List<LiveRateSymbol>(0);
         }
 
         /// <inheritdoc/>
@@ -249,7 +274,7 @@ namespace LiveRates.Client
         /// <param name="request">The <see cref="HttpRequestMessage"/> to send.</param>
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
         /// <returns>An <see cref="Task"/> that represents an asynchronous operation that contains a list of <see cref="LiveRate"/> objects.</returns>
-        protected virtual async Task<IEnumerable<LiveRate>> SendRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected virtual async Task<IEnumerable<LiveRate>> SendRateRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             using (HttpResponseMessage response = await _webApiCaller.SendAsync(request, cancellationToken).ConfigureAwait(false))
             {
@@ -266,11 +291,11 @@ namespace LiveRates.Client
                     }
 
                     return from r in rates
-                           select new LiveRate
+                           where r.Currency != null
+                           select new LiveRate(new LiveRateSymbol(r.Currency.Replace('/', '_'), EpochHelper.FromEpoch(Convert.ToInt64(r.TimeStamp))))
                            {
                                Ask = r.Ask.ToDecimal(),
                                Bid = r.Bid.ToDecimal(),
-                               Currency = r.Currency,
                                High = r.High.ToDecimal(),
                                Low = r.Low.ToDecimal(),
                                Rate = r.Rate,

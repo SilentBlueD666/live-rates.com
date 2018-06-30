@@ -24,7 +24,16 @@ namespace LiveRates.Client.Extensions
                 for (int i = 0; i < paramCount; i++)
                 {
                     string value = parameters.Get(i);
-                    if (value.IndexOf(',') < 0)
+                    if (value.IndexOf(',') > -1)
+                    {
+                        string[] values = value.Split(',');
+                        for (int v = 0; v < values.Length; v++)
+                        {
+                            values[v] = Uri.EscapeDataString(values[v]);
+                        }
+                        value = string.Join(",", values);
+                    }
+                    else
                         value = Uri.EscapeDataString(value);
 
                     queryParams[i] = string.Concat(parameters.GetKey(i), "=", value);

@@ -19,10 +19,9 @@ namespace TestApp
                 };
 
                 var liveRateSymbls = client.GetSymbolsAsync().Result;
-                var prices0 = client.GetPriceAsync(symbols).Result;
+                var prices0 = client.GetPricesAsync(symbols).Result;
                 var currencyRateSymbols = client.GetCurrencySymbolsAsync().Result;
-                var prices1 = client.GetPriceAsync(currencyRateSymbols).Result;
-
+                var prices1 = client.GetPricesAsync(currencyRateSymbols).Result;
 
                 Console.ReadLine();
             }

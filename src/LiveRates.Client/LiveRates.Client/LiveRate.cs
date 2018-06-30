@@ -10,82 +10,52 @@ namespace LiveRates.Client
         #region Public Properties
 
         /// <summary>
-        /// The currency the rate relates to.
-        /// </summary>
-        public string Currency
-        {
-            get { return Symbol.Symbol; }
-            set
-            {
-                var symbol = value;
-                if (!string.IsNullOrWhiteSpace(symbol))
-                {
-                    if (symbol.IndexOf('/') > -1)
-                    {
-                        string[] curreny = symbol.Split('/');
-                        FirstCurrency = curreny[0];
-                        SecondCurrency = curreny[1];
-                    }
-                    else
-                    {
-                        FirstCurrency = null;
-                        SecondCurrency = null;
-                    }
-
-                    Symbol = new LiveRateSymbol(symbol);
-                }
-            }
-        }
-
-        /// <summary>
         /// The rate symbol.
         /// </summary>
         public LiveRateSymbol Symbol { get; private set; }
 
         /// <summary>
-        /// The first currency in a FX Currency rate pair.
-        /// </summary>
-        public string FirstCurrency { get; private set; }
-
-        /// <summary>
-        /// The second currency in a FX Currency rate pair.
-        /// </summary>
-        public string SecondCurrency { get; private set; }
-
-        /// <summary>
-        /// Denotes this rate is a FX Currency rate.
-        /// </summary>
-        public bool IsCurrency { get => Symbol.IsCurrency; }
-
-        /// <summary>
         /// The rate price.
         /// </summary>
-        public decimal Rate { get; set; }
+        public decimal Rate { get; internal set; }
 
         /// <summary>
         /// The sell price.
         /// </summary>
-        public decimal Bid { get; set; }
+        public decimal Bid { get; internal set; }
 
         /// <summary>
         /// The buy price.
         /// </summary>
-        public decimal Ask { get; set; }
+        public decimal Ask { get; internal set; }
 
         /// <summary>
         /// The high price.
         /// </summary>
-        public decimal High { get; set; }
+        public decimal High { get; internal set; }
 
         /// <summary>
         /// The low price.
         /// </summary>
-        public decimal Low { get; set; }
+        public decimal Low { get; internal set; }
 
         /// <summary>
-        /// The rate time-stamp.
+        /// The rate UTC time-stamp.
         /// </summary>
-        public DateTime TimeStamp { get; set; }
+        public DateTime TimeStamp { get; internal set; }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Creates a default instance of the class.
+        /// </summary>
+        /// <param name="symbol">The symbol.</param>
+        internal LiveRate(LiveRateSymbol symbol)
+        {
+            Symbol = symbol;
+        }
 
         #endregion
 
@@ -96,7 +66,7 @@ namespace LiveRates.Client
         /// </summary>
         public override string ToString()
         {
-            return $"Symbol: {Symbol}, Rate:{Rate}";
+            return $"Symbol: {Symbol.Symbol}, Rate: {Rate}";
         }
 
         #endregion
