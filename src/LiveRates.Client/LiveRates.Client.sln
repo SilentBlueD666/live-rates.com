@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveRates.Client", "LiveRates.Client\LiveRates.Client.csproj", "{1921C0B7-BB36-4953-B092-2C06E320F083}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{FC1F9EA5-147F-41FF-8986-447DBCB66340}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{1921C0B7-BB36-4953-B092-2C06E320F083}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1921C0B7-BB36-4953-B092-2C06E320F083}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1921C0B7-BB36-4953-B092-2C06E320F083}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC1F9EA5-147F-41FF-8986-447DBCB66340}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC1F9EA5-147F-41FF-8986-447DBCB66340}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC1F9EA5-147F-41FF-8986-447DBCB66340}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC1F9EA5-147F-41FF-8986-447DBCB66340}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
